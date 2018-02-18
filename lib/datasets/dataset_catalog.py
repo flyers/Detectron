@@ -185,5 +185,35 @@ DATASETS = {
             _DATA_DIR + '/VOC2012/annotations/voc_2012_trainval.json',
         DEVKIT_DIR:
             _DATA_DIR + '/VOC2012/VOCdevkit2012'
-    }
+    },
+    'ycb_v3_bg_1': {
+        IM_DIR:
+            _DATA_DIR + '/ycb_v3_bg/01_wo_repeat',
+        ANN_FN:
+            _DATA_DIR + '/ycb_v3_bg/01_wo_repeat/annotations/instances_filtered_binary.json'
+    },
+    'ycb_v3_bg_2': {
+        IM_DIR:
+            _DATA_DIR + '/ycb_v3_bg/small_comb',
+        ANN_FN:
+            _DATA_DIR + '/ycb_v3_bg/small_comb/annotations/instances_filtered_binary.json'
+    },
+    'ycb_v3_bg_3': {
+        IM_DIR:
+            _DATA_DIR + '/ycb_v3_bg/small_comb_split',
+        ANN_FN:
+            _DATA_DIR + '/ycb_v3_bg/small_comb_split/annotations/instances_filtered_binary.json'
+    },
+    'ycb_v3_bg_4': {
+        IM_DIR:
+            _DATA_DIR + '/ycb_v3_bg/large_comb',
+        ANN_FN:
+            _DATA_DIR + '/ycb_v3_bg/large_comb/annotations/instances_filtered_binary.json'
+    },
+    'ycb_v3_bg_5': {
+        IM_DIR:
+            _DATA_DIR + '/ycb_v3_bg/duplicate_comb',
+        ANN_FN:
+            _DATA_DIR + '/ycb_v3_bg/duplicate_comb/annotations/instances_filtered_binary.json'
+    },
 }
