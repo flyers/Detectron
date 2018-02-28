@@ -72,7 +72,7 @@ def send_email(subject, body, to):
 
 
 def setup_logging(name):
-    FORMAT = '%(levelname)s %(filename)s:%(lineno)4d: %(message)s'
+    FORMAT = '%(asctime)s %(levelname)s %(filename)s:%(lineno)4d: %(message)s'
     # Manually clear root loggers to prevent any module that may have called
     # logging.basicConfig() from blocking our logging setup
     logging.root.handlers = []

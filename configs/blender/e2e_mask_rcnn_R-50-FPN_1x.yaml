@@ -4,14 +4,14 @@ MODEL:
   NUM_CLASSES: 2
   FASTER_RCNN: True
   MASK_ON: True
-NUM_GPUS: 1
+NUM_GPUS: 2
 SOLVER:
   WEIGHT_DECAY: 0.0001
   LR_POLICY: steps_with_decay
-  BASE_LR: 0.0025
+  BASE_LR: 0.005
   GAMMA: 0.1
   MAX_ITER: 50000
-  STEPS: [0, 30000, 40000]
+  STEPS: [0, 20000, 40000]
 FPN:
   FPN_ON: True
   MULTILEVEL_ROIS: True
@@ -31,14 +31,14 @@ MRCNN:
   CONV_INIT: MSRAFill  # default GaussianFill
 TRAIN:
   WEIGHTS: https://s3-us-west-2.amazonaws.com/detectron/ImageNetPretrained/MSRA/R-50.pkl
-  DATASETS: ('ycb_v3_bg_1', 'ycb_v3_bg_2', 'ycb_v3_bg_3', 'ycb_v3_bg_4', 'ycb_v3_bg_5')
+  DATASETS: ('ycb_v234',)
   SCALES: (480,)
   MAX_SIZE: 640
-  IMS_PER_BATCH: 1
+  IMS_PER_BATCH: 2
   BATCH_SIZE_PER_IM: 512
   RPN_PRE_NMS_TOP_N: 2000  # Per FPN level
 TEST:
-  DATASETS: ('ycb_v3_bg_1',)
+  DATASETS: ('ycb_v3_bg',)
   SCALES: (480,)
   MAX_SIZE: 640
   NMS: 0.5
