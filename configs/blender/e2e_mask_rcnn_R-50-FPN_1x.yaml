@@ -31,17 +31,18 @@ MRCNN:
   CONV_INIT: MSRAFill  # default GaussianFill
 TRAIN:
   WEIGHTS: https://s3-us-west-2.amazonaws.com/detectron/ImageNetPretrained/MSRA/R-50.pkl
-  DATASETS: ('ycb_v234',)
+  DATASETS: ('ycb_v234_depth',)
   SCALES: (480,)
   MAX_SIZE: 640
   IMS_PER_BATCH: 2
   BATCH_SIZE_PER_IM: 512
   RPN_PRE_NMS_TOP_N: 2000  # Per FPN level
 TEST:
-  DATASETS: ('ycb_v3_bg',)
+  DATASETS: ('ycb_test',)
   SCALES: (480,)
   MAX_SIZE: 640
   NMS: 0.5
   RPN_PRE_NMS_TOP_N: 1000  # Per FPN level
   RPN_POST_NMS_TOP_N: 1000
+  FORCE_JSON_DATASET_EVAL: True
 OUTPUT_DIR: .

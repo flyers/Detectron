@@ -210,4 +210,16 @@ DATASETS = {
         ANN_FN:
             _DATA_DIR + '/ycb_v234/annotations/instances_filtered_binary.json'
     },
+    'ycb_v234_depth': {
+        IM_DIR:
+            _DATA_DIR + '/ycb_v234',
+        ANN_FN:
+            _DATA_DIR + '/ycb_v234/annotations/instances_filtered_binary_depth.json'
+    },
+    'ycb_test': {
+        IM_DIR:
+            _DATA_DIR + '/ycb_test',
+        ANN_FN:
+            _DATA_DIR + '/ycb_test/annotations/instances_filtered_binary.json'
+    },
 }
