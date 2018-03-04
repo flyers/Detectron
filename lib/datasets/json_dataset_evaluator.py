@@ -52,10 +52,7 @@ def evaluate_masks(
     _write_coco_segms_results_file(
         json_dataset, all_boxes, all_segms, res_file)
     # Only do evaluation on non-test sets (annotations are undisclosed on test)
-    if json_dataset.name.find('test') == -1:
-        coco_eval = _do_segmentation_eval(json_dataset, res_file, output_dir)
-    else:
-        coco_eval = None
+    coco_eval = _do_segmentation_eval(json_dataset, res_file, output_dir)
     # Optionally cleanup results json file
     if cleanup:
         os.remove(res_file)
@@ -134,10 +131,7 @@ def evaluate_boxes(
     res_file += '.json'
     _write_coco_bbox_results_file(json_dataset, all_boxes, res_file)
     # Only do evaluation on non-test sets (annotations are undisclosed on test)
-    if json_dataset.name.find('test') == -1:
-        coco_eval = _do_detection_eval(json_dataset, res_file, output_dir)
-    else:
-        coco_eval = None
+    coco_eval = _do_detection_eval(json_dataset, res_file, output_dir)
     # Optionally cleanup results json file
     if cleanup:
         os.remove(res_file)
@@ -189,6 +183,7 @@ def _coco_bbox_results_one_category(json_dataset, boxes, cat_id):
 
 
 def _do_detection_eval(json_dataset, res_file, output_dir):
+    print(res_file)
     coco_dt = json_dataset.COCO.loadRes(str(res_file))
     coco_eval = COCOeval(json_dataset.COCO, coco_dt, 'bbox')
     coco_eval.evaluate()
@@ -334,10 +329,7 @@ def evaluate_keypoints(
     _write_coco_keypoint_results_file(
         json_dataset, all_boxes, all_keypoints, res_file)
     # Only do evaluation on non-test sets (annotations are undisclosed on test)
-    if json_dataset.name.find('test') == -1:
-        coco_eval = _do_keypoint_eval(json_dataset, res_file, output_dir)
-    else:
-        coco_eval = None
+    coco_eval = _do_keypoint_eval(json_dataset, res_file, output_dir)
     # Optionally cleanup results json file
     if cleanup:
         os.remove(res_file)
