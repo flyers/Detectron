@@ -46,6 +46,8 @@ def get_minibatch_blob_names(is_training=True):
     """
     # data blob: holds a batch of N images, each with 3 channels
     blob_names = ['data']
+    if cfg.MODEL.DEPTH:
+        blob_names += ['depth']
     if cfg.RPN.RPN_ON:
         # RPN-only or end-to-end Faster R-CNN
         blob_names += roi_data.rpn.get_rpn_blob_names(is_training=is_training)
@@ -67,7 +69,11 @@ def get_minibatch(roidb):
     # single tensor, hence we initialize each blob to an empty list
     blobs = {k: [] for k in get_minibatch_blob_names()}
     # Get the input image blob, formatted for caffe2
-    im_blob, im_scales = _get_image_blob(roidb)
+    if cfg.MODEL.DEPTH:
+        im_blob, depth_blob, im_scales = _get_image_depth_blob(roidb)
+        blobs['depth'] = depth_blob
+    else:
+        im_blob, im_scales = _get_image_blob(roidb)
     blobs['data'] = im_blob
     if cfg.RPN.RPN_ON:
         # RPN-only or end-to-end Faster/Mask R-CNN
@@ -114,3 +120,43 @@ def _get_image_blob(roidb):
     blob = blob_utils.im_list_to_blob(processed_ims)
 
     return blob, im_scales
+
+
+def _get_image_depth_blob(roidb):
+    """Builds an input blob from the images in the roidb at the specified
+    scales.
+    """
+    num_images = len(roidb)
+    # Sample random scales to use for each image in this batch
+    scale_inds = np.random.randint(
+        0, high=len(cfg.TRAIN.SCALES), size=num_images
+    )
+    processed_ims = []
+    processed_depth_ims = []
+    im_scales = []
+    for i in range(num_images):
+        im = cv2.imread(roidb[i]['image'])
+        depth = cv2.imread(roidb[i]['depth'])
+        assert im is not None, \
+            'Failed to read image \'{}\''.format(roidb[i]['image'])
+        assert depth is not None, \
+            'Failed to read image \'{}\''.format(roidb[i]['depth'])
+        if roidb[i]['flipped']:
+            im = im[:, ::-1, :]
+            depth = depth[:, ::-1, :]
+        target_size = cfg.TRAIN.SCALES[scale_inds[i]]
+        im, im_scale = blob_utils.prep_im_for_blob(
+            im, cfg.PIXEL_MEANS, [target_size], cfg.TRAIN.MAX_SIZE
+        )
+        depth, _ = blob_utils.prep_im_for_blob(
+            depth, cfg.PIXEL_MEANS, [target_size], cfg.TRAIN.MAX_SIZE
+        )
+        im_scales.append(im_scale[0])
+        processed_ims.append(im[0])
+        processed_depth_ims.append(depth[0])
+
+    # Create a blob to hold the input images
+    blob = blob_utils.im_list_to_blob(processed_ims)
+    blob_depth = blob_utils.im_list_to_blob(processed_depth_ims)
+
+    return blob, blob_depth, im_scales

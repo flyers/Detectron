@@ -28,6 +28,7 @@ from modeling.generate_anchors import generate_anchors
 from utils.c2 import const_fill
 from utils.c2 import gauss_fill
 import modeling.ResNet as ResNet
+import modeling.ResNet_depth as ResNet_d
 import utils.blob as blob_utils
 import utils.boxes as box_utils
 
@@ -45,6 +46,12 @@ HIGHEST_BACKBONE_LVL = 5  # E.g., "conv5"-like level
 def add_fpn_ResNet50_conv5_body(model):
     return add_fpn_onto_conv_body(
         model, ResNet.add_ResNet50_conv5_body, fpn_level_info_ResNet50_conv5
+    )
+
+
+def add_fpn_ResNet50_conv5_body_depth(model):
+    return add_fpn_onto_conv_body(
+        model, ResNet_d.add_ResNet50_conv5_body_depth, fpn_level_info_ResNet50_conv5
     )
 
 

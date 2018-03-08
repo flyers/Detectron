@@ -137,8 +137,14 @@ class JsonDataset(object):
         im_path = os.path.join(
             self.image_directory, self.image_prefix + entry['file_name']
         )
+        
         assert os.path.exists(im_path), 'Image \'{}\' not found'.format(im_path)
         entry['image'] = im_path
+        if cfg.MODEL.DEPTH:
+            depth_path = os.path.join(
+                self.image_directory, self.image_prefix + entry['depth']
+            )
+            entry['depth'] = depth_path
         entry['flipped'] = False
         entry['has_visible_keypoints'] = False
         # Empty placeholders

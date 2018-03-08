@@ -103,6 +103,16 @@ class DetectionModelHelper(cnn.CNNModelHelper):
         else:
             return self.net.AffineChannel([blob_in, scale, bias], blob_out)
 
+    def AffineChannelShared(self, blob_in, blob_out, dim, scale=None, bias=None, inplace=False):
+        """Add Affine transformation op that shares parameters with another affinechannel op.
+        """
+        blob_out = blob_out or self.net.NextName()
+
+        if inplace:
+            return self.net.AffineChannel([blob_in, scale, bias], blob_in)
+        else:
+            return self.net.AffineChannel([blob_in, scale, bias], blob_out)
+
     def GenerateProposals(self, blobs_in, blobs_out, anchors, spatial_scale):
         """Op for generating RPN porposals.
 
@@ -407,6 +417,34 @@ class DetectionModelHelper(cnn.CNNModelHelper):
         )
         blob_out = self.AffineChannel(
             conv_blob, prefix + suffix, dim=dim_out, inplace=inplace
+        )
+        return blob_out
+
+    def ConvAffineShared(  # args in the same order of Conv()
+        self, blob_in, prefix, dim_in, dim_out, kernel, stride, pad,
+        weight=None, bias=None,
+        affine_scale=None, affine_bias=None,
+        suffix='_bn',
+        inplace=False
+    ):
+        """ConvAffine adds a Conv op followed by a AffineChannel op (which
+        replaces BN during fine tuning).
+        """
+        conv_blob = self.ConvShared(
+            blob_in,
+            prefix,
+            dim_in,
+            dim_out,
+            kernel,
+            stride=stride,
+            pad=pad,
+            weight=weight,
+            bias=bias,
+            no_bias=1
+        )
+        
+        blob_out = self.AffineChannelShared(
+            conv_blob, prefix + suffix, scale=affine_scale, bias=affine_bias, inplace=inplace
         )
         return blob_out
 
