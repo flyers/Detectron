@@ -49,20 +49,22 @@ import utils.keypoints as keypoint_utils
 logger = logging.getLogger(__name__)
 
 
-def im_detect_all(model, im, box_proposals, timers=None):
+def im_detect_all(model, im, box_proposals, timers=None, depth=None):
     if timers is None:
         timers = defaultdict(Timer)
 
     # Handle RetinaNet testing separately for now
     if cfg.RETINANET.RETINANET_ON:
+        assert cfg.MODEL.DEPTH == False
         cls_boxes = test_retinanet.im_detect_bbox(model, im, timers)
         return cls_boxes, None, None
 
     timers['im_detect_bbox'].tic()
     if cfg.TEST.BBOX_AUG.ENABLED:
+        assert cfg.MODEL.DEPTH == False
         scores, boxes, im_scales = im_detect_bbox_aug(model, im, box_proposals)
     else:
-        scores, boxes, im_scales = im_detect_bbox(model, im, box_proposals)
+        scores, boxes, im_scales = im_detect_bbox(model, im, box_proposals, depth=depth)
     timers['im_detect_bbox'].toc()
 
     # score and boxes are from the whole image after score thresholding and nms
@@ -76,6 +78,7 @@ def im_detect_all(model, im, box_proposals, timers=None):
     if cfg.MODEL.MASK_ON and boxes.shape[0] > 0:
         timers['im_detect_mask'].tic()
         if cfg.TEST.MASK_AUG.ENABLED:
+            assert cfg.MODEL.DEPTH == False
             masks = im_detect_mask_aug(model, im, boxes)
         else:
             masks = im_detect_mask(model, im_scales, boxes)
@@ -90,6 +93,7 @@ def im_detect_all(model, im, box_proposals, timers=None):
         cls_segms = None
 
     if cfg.MODEL.KEYPOINTS_ON and boxes.shape[0] > 0:
+        assert cfg.MODEL.DEPTH == False
         timers['im_detect_keypoints'].tic()
         if cfg.TEST.KPS_AUG.ENABLED:
             heatmaps = im_detect_keypoints_aug(model, im, boxes)
@@ -114,7 +118,7 @@ def im_conv_body_only(model, im):
     return im_scale_factors
 
 
-def im_detect_bbox(model, im, boxes=None):
+def im_detect_bbox(model, im, boxes=None, depth=None):
     """Bounding box object detection for an image with given box proposals.
 
     Arguments:
@@ -130,7 +134,7 @@ def im_detect_bbox(model, im, boxes=None):
         im_scales (list): list of image scales used in the input blob (as
             returned by _get_blobs and for use with im_detect_mask, etc.)
     """
-    inputs, im_scales = _get_blobs(im, boxes)
+    inputs, im_scales = _get_blobs(im, boxes, depth=depth)
 
     # When mapping from image ROIs to feature map ROIs, there's some aliasing
     # (some distinct image ROIs get mapped to the same feature ROI).
@@ -909,6 +913,29 @@ def _get_image_blob(im):
     return blob, np.array(im_scale_factors)
 
 
+def _get_image_depth_blob(im, depth):
+    """Converts an image into a network input.
+
+    Arguments:
+        im (ndarray): a color image in BGR order
+        depth (ndarray): a depth image with 3 channels
+
+    Returns:
+        blob (ndarray): a data blob holding an image pyramid
+        im_scale_factors (ndarray): array of image scales (relative to im) used
+            in the image pyramid
+    """
+    processed_ims, im_scale_factors = blob_utils.prep_im_for_blob(
+        im, cfg.PIXEL_MEANS, cfg.TEST.SCALES, cfg.TEST.MAX_SIZE
+    )
+    processed_depths, _ = blob_utils.prep_im_for_blob(
+        depth, cfg.PIXEL_MEANS, cfg.TEST.SCALES, cfg.TEST.MAX_SIZE
+    )
+    blob = blob_utils.im_list_to_blob(processed_ims)
+    blob_depth = blob_utils.im_list_to_blob(processed_depths)
+    return blob, blob_depth, np.array(im_scale_factors)
+
+
 def _get_rois_blob(im_rois, im_scale_factors):
     """Converts RoIs into network inputs.
 
@@ -975,10 +1002,14 @@ def _add_multilevel_rois_for_test(blobs, name):
     )
 
 
-def _get_blobs(im, rois):
+def _get_blobs(im, rois, depth=None):
     """Convert an image and RoIs within that image into network inputs."""
     blobs = {}
-    blobs['data'], im_scale_factors = _get_image_blob(im)
+    if cfg.MODEL.DEPTH:
+        assert depth is not None
+        blobs['data'], blobs['depth'], im_scale_factors = _get_image_depth_blob(im, depth)
+    else:
+        blobs['data'], im_scale_factors = _get_image_blob(im)
     if cfg.MODEL.FASTER_RCNN and rois is None:
         height, width = blobs['data'].shape[2], blobs['data'].shape[3]
         scale = im_scale_factors[0]

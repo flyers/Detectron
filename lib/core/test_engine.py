@@ -188,9 +188,10 @@ def test_net(output_dir, ind_range=None, gpu_id=0):
             box_proposals = None
 
         im = cv2.imread(entry['image'])
+        depth = cv2.imread(entry['depth']) if cfg.MODEL.DEPTH else None
         with c2_utils.NamedCudaScope(gpu_id):
             cls_boxes_i, cls_segms_i, cls_keyps_i = im_detect_all(
-                model, im, box_proposals, timers
+                model, im, box_proposals, timers, depth=depth
             )
 
         extend_results(i, all_boxes, cls_boxes_i)
