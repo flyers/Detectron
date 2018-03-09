@@ -422,6 +422,7 @@ class DetectionModelHelper(cnn.CNNModelHelper):
 
     def ConvAffineShared(  # args in the same order of Conv()
         self, blob_in, prefix, dim_in, dim_out, kernel, stride, pad,
+        group=1, dilation=1,
         weight=None, bias=None,
         affine_scale=None, affine_bias=None,
         suffix='_bn',
@@ -438,13 +439,15 @@ class DetectionModelHelper(cnn.CNNModelHelper):
             kernel,
             stride=stride,
             pad=pad,
+            group=group,
+            dilation=dilation,
             weight=weight,
             bias=bias,
             no_bias=1
         )
-        
+
         blob_out = self.AffineChannelShared(
-            conv_blob, prefix + suffix, scale=affine_scale, bias=affine_bias, inplace=inplace
+            conv_blob, prefix + suffix, dim=dim_out, scale=affine_scale, bias=affine_bias, inplace=inplace
         )
         return blob_out
 

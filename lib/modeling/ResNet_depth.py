@@ -55,8 +55,10 @@ def add_ResNet50_conv5_body_depth(model):
     add_ResNet_convX_body(model, (3, 4, 6, 3), name='depth')
     # concat rgb conv and depth conv feature maps
     conv_blobs = ('res5_2_sum', 'res4_5_sum', 'res3_3_sum', 'res2_2_sum')
-    for blob in conv_blobs:
-        p = model.Concat([blob, blob + '_depth'], blob, axis=1)
+    filter_list = (2048, 1024, 512, 256)
+    for blob, f in zip(conv_blobs, filter_list):
+        p = model.Concat([blob, blob + '_depth'], blob + '_concat', axis=1)
+        p = model.Conv(p, blob + '_merge', f*2, f, 1, pad=0, stride=1, no_bias=1)
     return p, dim_conv, spatial_scale_conv
 
 
@@ -246,7 +248,7 @@ def add_shortcut(model, prefix, blob_in, dim_in, dim_out, stride, name=None):
             scale=prefix + '_branch1_bn_s',
             bias=prefix + '_branch1_bn_b',
         )
-    
+
 
 
 # ------------------------------------------------------------------------------

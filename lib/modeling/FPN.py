@@ -51,7 +51,7 @@ def add_fpn_ResNet50_conv5_body(model):
 
 def add_fpn_ResNet50_conv5_body_depth(model):
     return add_fpn_onto_conv_body(
-        model, ResNet_d.add_ResNet50_conv5_body_depth, fpn_level_info_ResNet50_conv5
+        model, ResNet_d.add_ResNet50_conv5_body_depth, fpn_level_info_ResNet50_conv5_depth
     )
 
 
@@ -505,6 +505,14 @@ FpnLevelInfo = collections.namedtuple(
 def fpn_level_info_ResNet50_conv5():
     return FpnLevelInfo(
         blobs=('res5_2_sum', 'res4_5_sum', 'res3_3_sum', 'res2_2_sum'),
+        dims=(2048, 1024, 512, 256),
+        spatial_scales=(1. / 32., 1. / 16., 1. / 8., 1. / 4.)
+    )
+
+
+def fpn_level_info_ResNet50_conv5_depth():
+    return FpnLevelInfo(
+        blobs=('res5_2_sum_merge', 'res4_5_sum_merge', 'res3_3_sum_merge', 'res2_2_sum_merge'),
         dims=(2048, 1024, 512, 256),
         spatial_scales=(1. / 32., 1. / 16., 1. / 8., 1. / 4.)
     )
